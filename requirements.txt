@@ -1,0 +1,4 @@
+Flask
+flask-restful
+tensorflow==2.0.0
+matplotlib
