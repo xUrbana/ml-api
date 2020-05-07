@@ -11,7 +11,7 @@ model = tf.keras.Sequential([
     tf.keras.layers.Flatten(input_shape=(28, 28)),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(10)
+    tf.keras.layers.Dense(10, activation='softmax')
 ])
 
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -23,15 +23,16 @@ model.compile(
 )
 
 model.fit(x_train, y_train, epochs=10)
+model.summary()
+model.save('mnist.model')
 
-model.evaluate(x_test, y_test, verbose=2)
-
+'''
 probability_model = tf.keras.Sequential([
     model,
     tf.keras.layers.Softmax()
 ])
 
-model.save('mnist_model')
-probability_model.save('mnist_probability_model')
+probability_model.save('mnist_probability.model')
+'''
 
 
