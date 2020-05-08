@@ -1,17 +1,16 @@
 import tensorflow as tf
-import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
-mnist = tf.keras.datasets.mnist
-
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-model = tf.keras.Sequential([
+model = tf.keras.models.Sequential([
     tf.keras.layers.Flatten(input_shape=(28, 28)),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(10, activation='softmax')
+    tf.keras.layers.Dense(10)
 ])
 
 loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -23,16 +22,21 @@ model.compile(
 )
 
 model.fit(x_train, y_train, epochs=10)
+
+model.evaluate(x_test, y_test, verbose=3)
+
 model.summary()
+
+first_x = x_test[0]
+first_y = y_test[0]
+
+pred = model(np.reshape(first_x, (1, 28, 28)))
+confidence = tf.nn.softmax(pred).numpy()
+print(confidence)
+
+
 model.save('mnist.model')
 
-'''
-probability_model = tf.keras.Sequential([
-    model,
-    tf.keras.layers.Softmax()
-])
 
-probability_model.save('mnist_probability.model')
-'''
 
 
