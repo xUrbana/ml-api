@@ -1,4 +1,4 @@
 Flask
 flask-apispec
 tensorflow==2.0.0
-matplotlib
+Pillow
