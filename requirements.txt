@@ -1,4 +1,6 @@
 Flask
 flask-apispec
 tensorflow==2.0.0
+markdown2
+pygments
 matplotlib
