@@ -1,1 +1,1 @@
-**MNIST ML API**
+**MNIST Hand-Written Digits Machine Learning API**

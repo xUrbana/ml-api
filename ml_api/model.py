@@ -27,14 +27,6 @@ model.evaluate(x_test, y_test, verbose=3)
 
 model.summary()
 
-first_x = x_test[0]
-first_y = y_test[0]
-
-pred = model(np.reshape(first_x, (1, 28, 28)))
-confidence = tf.nn.softmax(pred).numpy()
-print(confidence)
-
-
 model.save('mnist.model')
 
 
