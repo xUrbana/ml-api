@@ -10,15 +10,17 @@ from PIL import Image, ImageOps
 import tensorflow as tf
 import numpy as np
 import markdown
+from pygments.formatters.html import HtmlFormatter
 
-# Load models that were saved out from model.py
+################## Load our machine learning models to use for predictions ###################
 model = tf.keras.models.load_model('mnist.model')
 pmodel = tf.keras.models.Sequential([
     model,
     tf.keras.layers.Softmax()
 ])
+##############################################################################################
 
-# Initialize app and inject automatic swagger docs
+########### Initialize app and inject API spec and allow for automatic file upload ###########
 app = Flask(__name__)
 docs = FlaskApiSpec(app)
 
@@ -37,7 +39,13 @@ app.config.update({
 @file_plugin.map_to_openapi_type('file', None)
 class FileField(fields.Raw):
     pass
+##############################################################################################
 
+
+#################### Custom styling for code blocks generated in markdown ####################
+formatter = HtmlFormatter(style='emacs', full=True, cssclass='codehilite')
+css = f'<style>{formatter.get_style_defs()}</style>'
+##############################################################################################
 
 @docs.register
 @doc(description='Make a prediction against the model with your own hand-drawn digit. Native 28x28 pixel images work the best. Images that are not 28x28 might suffer from downscaling.',
@@ -45,22 +53,8 @@ class FileField(fields.Raw):
 @app.route('/MNIST/predict', methods=['POST'])
 @use_kwargs({'file': FileField(required=True), 'encoding': fields.Str()}, locations=['files'])
 def mnist_predict(file: FileStorage, encoding: str = 'L'):
-    
-    '''
-    try:
-        file = request.files['file']
-    except KeyError:
-        flash('No file part')
-        return redirect(request.url)
 
-    try:
-        encoding = request.form['encoding']
-    except KeyError:
-        encoding = 'L'
-    '''
-    data = file.read()
-    print(len(data))
-    digit_data = read_digit(data, encoding)
+    digit_data = read_digit(file.stream.read(), encoding)
 
     prediction = pmodel(digit_data)
     arr = prediction.numpy()[0]
@@ -72,15 +66,22 @@ def mnist_predict(file: FileStorage, encoding: str = 'L'):
     })
 
 @docs.register
+@doc(description='Information about the machine learning model used to make predictions.')
+@app.route('/MNIST', methods=['GET'])
+def mnist_specs():
+    cfg = model.get_config()
+    return jsonify(cfg)
+
+@docs.register
 @app.route('/', methods=['GET'])
 def mnist_about():
 
     with open('README.md') as fp:
         md = fp.read()
     
-    md = markdown.markdown(md)
+    md = markdown.markdown(md, extensions=['codehilite'])
 
-    return md
+    return css + md
 
 
 if __name__ == '__main__':
